@@ -1,5 +1,12 @@
 import { verify } from "https://deno.land/x/djwt/mod.ts";
-import cfg from "../../../config.js";
+// import cfg from "../../../config.js";
+const cfg = {
+  Key: await crypto.subtle.generateKey(
+    { name: "HMAC", hash: "SHA-512" },
+    true,
+    ["sign", "verify"]
+  ),
+};
 
 const authMiddleware = async (ctx, next) => {
   const headers = ctx.request.headers;

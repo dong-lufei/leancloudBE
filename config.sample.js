@@ -6,8 +6,18 @@ export default [
   {
     garden: {
       fields: {
-        OCStatus: "",
-        hasAdmin: false,
+        a: "number",
+        b: "string",
+        c: "boolean",
+        d: "null",
+        e: "undefined",
+        f: "array",
+        g: "object",
+        h: "date",
+      },
+      defaults: {
+        b: "",
+        c: false,
       },
     },
   },
