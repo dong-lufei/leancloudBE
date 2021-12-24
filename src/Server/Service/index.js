@@ -32,7 +32,7 @@ export const toRouter = (conn, tbCfg) => async (ctx) => {
   let errRes = "",
     resBat = [];
 
-  // # 整理请求体数据
+  // # 处理有请求体的情况
   if (["POST", "PUT"].includes(method)) {
     // 1.新增和修改接口需要携带请求体，否则报错返回
     // 请求体为空对象或空 hasBody竟然为true 不进这句条件块代码=>bug
@@ -51,12 +51,12 @@ export const toRouter = (conn, tbCfg) => async (ctx) => {
       responseData(ctx, 400, "请求体不能为空");
       return;
     }
-    console.log("展示请求体数据：", body);
+    // console.log("展示请求体数据：", body);
 
     // # 拿到配置表字段的默认值数据;
     // 2.区别单个新增 和 批量操作的接口
     if (pathname !== "/1.1/batch") {
-      // # 检查请求的字段和类型 (非批量里的登录接口 这里不检查)
+      // # 检查请求的字段和类型 (非批量里的登录接口 这里不检查) 有不符合的报错
       if (pathname !== "/1.1/login") {
         errRes = checkField(body, pathname, tbCfg);
         if (errRes) {
@@ -70,10 +70,10 @@ export const toRouter = (conn, tbCfg) => async (ctx) => {
       const isUserFetch = getCfgData(pathname, tbCfg).isUser;
       // 3.区别是否用户表 # 新增或修改普通非内置用户表前 先新增或修改内置用户表
       if (isUserFetch) {
+        // 是用户表
         const userAfter = await handleUser(
           conn,
           tbCfg,
-          opt.headers,
           body,
           method,
           pathname,
@@ -101,25 +101,29 @@ export const toRouter = (conn, tbCfg) => async (ctx) => {
       // console.log("'非批量接口的请求体':", body);
     }
     // # 这里是批量接口
-    else if (method === "POST" && pathname === "/1.1/batch") {
-      // 存储 不在数据表配置中的表名路由禁止请求
-      let notAllowePath = [];
-
+    else if (pathname === "/1.1/batch" && method === "POST") {
       // 遍历批量接口的请求体里的路由
       for (let [index, item] of body.requests.entries()) {
         // 获取配置表的相关数据
         const cfgData = getCfgData(item.path, tbCfg);
         if (!cfgData.isRoute) {
-          notAllowePath.push(item.path); // 存储配置表里面没有的路径名
+          // 不在数据表配置中的表名路由 报错;
+          responseData(ctx, 404, `此path ${item.path} ,不在数据配置表上！！`);
+          return;
         }
 
+        // 批量接口的字段检查
+        errRes = checkField(item.body, item.path, tbCfg);
+        if (errRes) {
+          responseData(ctx, errRes.code, errRes.msg);
+          return;
+        }
         // 用户表单独处理
         if (cfgData.isUser) {
           const ses = item.headers?.["X-LC-Session"];
           const userAfter = await handleUser(
             conn,
             tbCfg,
-            item.headers,
             item.body,
             item.method,
             item.path,
@@ -152,15 +156,6 @@ export const toRouter = (conn, tbCfg) => async (ctx) => {
           };
         }
       }
-
-      // 数组有值表示路径有误
-      if (notAllowePath.length) {
-        ctx.response.body = {
-          code: 404,
-          msg: "此路由 '" + notAllowePath[0] + "' ：不在数据配置表上！！",
-        };
-        return;
-      }
     }
 
     // put接口 和 以上赋值后的数据格式转换
@@ -169,7 +164,7 @@ export const toRouter = (conn, tbCfg) => async (ctx) => {
 
   let resBody; //响应后的json格式数据
   try {
-    // 获取和删除单个数据资源不存在时的错误处理
+    // 获取和删除单个数据接口 资源不存在时的错误处理
     if (ctx.params.id && ["GET", "DELETE"].includes(method)) {
       const n = pathname.lastIndexOf("/");
       const n1 = pathname.slice(0, n);
@@ -183,21 +178,15 @@ export const toRouter = (conn, tbCfg) => async (ctx) => {
         headers: opt.headers,
       });
       const hasData = await checkData.json();
-      //访问服务器失败
+      //访问leancloud服务器失败报错
       if (!checkData.ok) {
-        ctx.response.body = {
-          code: hasData.code,
-          msg: hasData.error,
-        };
+        responseData(ctx, hasData.code, hasData.error);
         return;
       }
 
-      // 此Id数据库不存在
+      // 此Id数据库不存在 报错
       if (!hasData.count) {
-        ctx.response.body = {
-          code: 404,
-          msg: "此资源 " + ctx.params.id + " ：在数据库上不存在",
-        };
+        responseData(ctx, 404, `此资源 ${ctx.params.id} 在数据库上不存在!!`);
         return;
       }
 
@@ -209,12 +198,13 @@ export const toRouter = (conn, tbCfg) => async (ctx) => {
         // 拿到用户请求体的Session（修改删除内置表数据需要它或masterKey）
         const sessionKey = ctx.request.headers.get("X-LC-Session");
         opt.headers["X-LC-Session"] = sessionKey;
-
+        // 用户表的删除不带session就报错
         if (!sessionKey) {
-          ctx.response.body = {
-            code: 206,
-            msg: "The user cannot be altered by other users or with outdated session!!",
-          };
+          responseData(
+            ctx,
+            206,
+            "The user cannot be altered by other users or with outdated session!!"
+          );
           return;
         }
       }
@@ -228,12 +218,7 @@ export const toRouter = (conn, tbCfg) => async (ctx) => {
       // 最后 发送请求访问leancloud数据库
       const resDB = await fetch(fetchUrl, opt);
       // const resDB = await fetch(fetOpt.url, fetOpt.cfg);
-      console.log(
-        "'数据库响应':",
-        resDB.ok,
-        "lo",
-        resDB.headers.get("location")
-      );
+      console.log("'DB响应':", resDB.ok, "lo", resDB.headers.get("location"));
 
       resBody = await resDB.json();
       console.log("'响应后的json格式数据':", resBody);
@@ -262,7 +247,7 @@ export const toRouter = (conn, tbCfg) => async (ctx) => {
           const userName = resBody.username;
           const sToken = resBody.sessionToken;
 
-          // # 非批量和批量接口接口的 sessionToken、username、JWT
+          // # 非批量接口登录、注册登录响应 sessionToken、username、JWT
           if (pathname !== "/1.1/batch" || pathname === "/1.1/login") {
             // 用户注册或登录接口响应sessionToken 和username;
             if (userName) {
@@ -277,6 +262,7 @@ export const toRouter = (conn, tbCfg) => async (ctx) => {
               bodyData.data.jwt = await buildJWT(username, conn);
             }
           } else {
+            // 批量接口登录、注册登录 响应 sessionToken、username、JWT
             for await (let [index, item] of resBat.entries()) {
               if (!item.username) {
                 bodyData.data[index]["success"] = {
@@ -307,7 +293,6 @@ export const toRouter = (conn, tbCfg) => async (ctx) => {
       ctx.response.body = {
         code: 500,
         msg: Object.keys(error).length || "Failed to access server!!",
-        // msg: error || "Failed to access server!!",
       };
     }
   }

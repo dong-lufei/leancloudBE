@@ -13,7 +13,7 @@ export default [
       },
     },
   },
-  // 用户表
+  // 用户表例子：
   {
     user: {
       isUser: true,
@@ -21,25 +21,33 @@ export default [
         username: "string",
         mobilePhoneNumber: "string",
         password: "string",
+        phone: "string",
+        authData: "object",
+        a: "number",
+        b: "boolean",
+        c: "array",
+        d: "date",
+        e: "null",
+        f: "undefined",
       },
     },
   },
-  // 小区表
+  // 小区表例子：
   {
     garden: {
       fields: {
-        a: "number",
-        b: "string",
-        c: "boolean",
-        d: "null",
-        e: "undefined",
-        f: "array",
-        g: "object",
-        h: "date",
+        city: "string",
+        area: "string",
+        address: "string",
+        gardenName: "string",
+        img: "string",
+        admin: "object",
+        OCStatus: "string",
+        hasAdmin: "boolean",
       },
       defaults: {
-        b: "",
-        c: false,
+        OCStatus: "",
+        hasAdmin: false,
       },
     },
   },

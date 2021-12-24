@@ -23,6 +23,7 @@ export const responseData = (context, status, message, result = "") => {
     data: result,
   };
 };
+
 // 封装获取数据类型
 const getDataType = (data) => {
   const toStr = Object.prototype.toString.call(data);
@@ -85,14 +86,14 @@ export const checkField = (fetchBody, path, cfg) => {
     // 检查请求字段  不存在于配置表就报错
     if (!fields[key]) {
       // 判断配置表里是否有请求体的这个字段名和对应的类型是否正确
-      result = { code: 400, msg: `请求的${key}属性，不在配置表默认字段中` };
+      result = { code: 400, msg: `请求的${key}属性，不在配置表默认字段中!!` };
       return result;
     }
     // 检查请求的字段类型 是否和配置表相符 不符就返回错误
     if (fieldType !== fields[key]) {
       result = {
         code: 400,
-        msg: `请求的${key}属性，类型不符合配置表中的${fields[key]}类型`,
+        msg: `请求的${key}属性，类型不符合配置表中的${fields[key]}类型!!`,
       };
       return result;
     }
@@ -112,7 +113,6 @@ export const getFullUrl = (cfgLean, pathUrl, search = "") => {
 export const handleUser = async (
   con,
   TbCfg,
-  headers,
   body,
   method,
   pathname,
