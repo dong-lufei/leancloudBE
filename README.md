@@ -12,7 +12,7 @@
 
 ```
 // 引入线上资源
-import AutoApi from "xx";
+import AutoApi from "https://cdn.deno.land/leancloudbe/versions/v0.2.1/raw/src/Server/index.js";
 
 // 引入自己创建的配置文件
 import tbCfg from "./config.js";
@@ -43,7 +43,8 @@ deno run -A index.js
 调用接口函数
 
 ```
-import Client from "xx";
+import Client from "https://cdn.deno.land/leancloudbe/versions/v0.2.1/raw/src/Client/index.js";
+
 // import axios from "axios";
 
 // # 增 非用户表的新增

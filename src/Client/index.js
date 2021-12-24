@@ -1,11 +1,12 @@
-import "../Server/index.js";
+// import "../Server/index.js";
 
-export const getUsers = () => {
-  return 123;
-};
+// export const getUsers = () => {
+//   return 123;
+// };
 
 export default (req) => {
   console.log("req", req);
+
   return {
     config(cfg) {
       return {
