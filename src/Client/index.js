@@ -1,11 +1,7 @@
-// import "../Server/index.js";
 
-// export const getUsers = () => {
-//   return 123;
-// };
 
 export default (req) => {
-  console.log("req", req);
+  console.log("请求库是", req);
 
   return {
     config(cfg) {
@@ -17,7 +13,7 @@ export default (req) => {
               ? `${cfg}/1.1/${tableName}`
               : `${cfg}/1.1/classes/${tableName}`;
 
-          // console.log("路径", url);
+          console.log("路径", url);
 
           if (req === fetch) {
             // # fetch 方式有格式要求
@@ -32,7 +28,7 @@ export default (req) => {
           };
           // }
 
-          // console.log("请求配置", data);
+          console.log("POST接口的请求配置", data);
           return req(url, data);
         },
 
@@ -58,7 +54,7 @@ export default (req) => {
             method: "PUT",
             ...reqCfg,
           };
-          console.log(4, data);
+          console.log("PUT接口的请求配置", data);
           return req(`${cfg}/1.1/classes/${tableName}`, data);
         },
 
@@ -73,7 +69,8 @@ export default (req) => {
             method: "DELETE",
             ...reqCfg,
           };
-          console.log(31, tableName);
+          console.log("删除的表名", tableName);
+          console.log("删除接口的配置", data);
           return req(`${cfg}/1.1/classes/${tableName}`, data);
         },
       };

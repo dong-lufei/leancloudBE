@@ -12,7 +12,7 @@
 
 ```
 // 引入线上资源
-import AutoApi from "https://cdn.deno.land/leancloudbe/versions/v0.2.1/raw/src/Server/index.js";
+import AutoApi from "https://cdn.deno.land/leancloudbe/versions/v0.2.2/raw/src/Server/index.js";
 
 // 引入自己创建的配置文件
 import tbCfg from "./config.js";
@@ -20,10 +20,10 @@ import tbCfg from "./config.js";
 // 传配置启用封装的函数接口
 AutoApi.config({
   connect: {
-    type: "leancloud",
+    type: "leancloud", // 以下3条需要去leancloud官网注册创建应用才有
     appId: "",
     appKey: "",
-    baseUrl: "",
+    baseUrl: "", // 即leancloud的 REST API 服务器地址
   },
   table: tbCfg,
   host: "http://localhost",
@@ -43,9 +43,9 @@ deno run -A index.js
 调用接口函数
 
 ```
-import Client from "https://cdn.deno.land/leancloudbe/versions/v0.2.1/raw/src/Client/index.js";
+import Client from "https://cdn.deno.land/leancloudbe/versions/v0.2.2/raw/src/Client/index.js";
 
-// import axios from "axios";
+// import axios from "axios"; // 用axios就把下面fetch里的body改成data
 
 // # 增 非用户表的新增
 const res1 = await Client(fetch)
