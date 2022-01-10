@@ -264,7 +264,7 @@ export const toRouter = (conn, tbCfg) => async (ctx) => {
           } else {
             // 批量接口登录、注册登录 响应 sessionToken、username、JWT
             for await (let [index, item] of resBat.entries()) {
-              if (!item.username) {
+              if (!item?.username) {
                 bodyData.data[index]["success"] = {
                   ...bodyData.data[index]["success"],
                 };

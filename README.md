@@ -17,7 +17,7 @@ import AutoApi from "https://cdn.deno.land/leancloudbe/versions/v0.2.2/raw/src/S
 // 引入自己创建的配置文件
 import tbCfg from "./config.js";
 
-// 传配置启用封装的函数接口
+// 传参(配置)调用封装的函数启动接口
 AutoApi.config({
   connect: {
     type: "leancloud", // 以下3条需要去leancloud官网注册创建应用才有
@@ -45,7 +45,7 @@ deno run -A index.js
 ```
 import Client from "https://cdn.deno.land/leancloudbe/versions/v0.2.2/raw/src/Client/index.js";
 
-// import axios from "axios"; // 用axios就把下面fetch里的body改成data
+// import axios from "axios"; // 用axios就把下面fetch改成axios和把外层body(批量接口里面的还是body)改成data
 
 // # 增 非用户表的新增
 const res1 = await Client(fetch)
