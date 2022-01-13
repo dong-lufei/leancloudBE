@@ -1,7 +1,5 @@
-
-
 export default (req) => {
-  console.log("请求库是", req);
+  console.log("进入封装BE的请求库是", req.toString());
 
   return {
     config(cfg) {
